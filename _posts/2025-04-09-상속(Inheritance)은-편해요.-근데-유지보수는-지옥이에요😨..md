@@ -8,7 +8,7 @@
 
 ---
 
-## 상속의 장점
+## 상속의 장점 👍
 상속은 아래와 같은 장점을 가지고 있다.
 1. 코드 재사용성
    - 공통 기능을 부모 클래스에 두고, 자식 클래스에서 재활용할 수 있다.
@@ -23,7 +23,7 @@
 
 ---
 
-## 상속의 단점
+## 상속의 단점 👎
 상속은 아래와 같은 단점을 가지고 있다.
 
 #### 1. 캡슐화를 꺠뜨린다.
@@ -120,10 +120,12 @@ public boolean addAll(Collection<? extends E> c) {
 상속은 부모 클래스의 기능을 재사용할 수 있다는 장점이 있지만, 만약 부모 클래스에 존재하는 결함이나 설계상의 문제점까지 자식 클래스가 그대로 물려받게 된다.
 부모 클래스에 숨겨진 버그가 있는 경우, 이를 상속받은 자식 클래스에도 동일한 문제가 발생할 수 있으며, 그 원인을 추적하기 어려워진다.
 
+---
+
 ## 그럼 상속은 언제 써 🤮
 물론 상속도 쓰면 좋은 경우가 있다. 어떤 경우에 상속을 쓰면 좋을지 알아보자.
 
-#### 1. 공통된 흐름을 강제하고 싶을 때 (비즈니스 로직의 강제 적용)
+#### 공통된 흐름을 강제하고 싶을 때 (비즈니스 로직의 강제 적용)
 예를 들어, 결제 서비스를 생각해보자.<br>
 결제 플로우는 다음과 같은 흐름으로 이루어있다고 했을 때
 - 결제 정보 확인
@@ -176,8 +178,126 @@ public class SamsungCardPayment extends CardPaymentService {
 }
 ```
 
+```java
+# 실행 예시
+public class Main {
+    public static void main(String[] args) {
+        CardPaymentService kakao = new KakaoCardPayment();
+        kakao.processPayment();
 
+        System.out.println();
 
-#### 2. 공통 정리 로직 제공
+        CardPaymentService samsung = new SamsungCardPayment();
+        samsung.processPayment();
+    }
+}
+```
 
+---
 
+## 그럼 이대로 코드를 지저분하게 써야될까 ❓
+상속의 단점이나 한계를 느꼈다면, <span style='color: orange'>대안으로 **조합(Compostion)**을 고민해볼 수 있다.</span>
+
+### 조합(Compostion)
+<span style='color: orange'>**필요한 기능을 다른 객체에게 맡기고 조합해서 사용하는 방식**</span>을 의미한다. 쉽게 말해, 상속 대신 <span style='color: orange'>**클래스 안에 다른 객체를 포함시켜서 기능을 사용하는 구조**</span>이다.
+이번에 조합을 사용하여 코드를 작성해보자. <br>예제는 위의 추상 클래스를 사용하여 작성한 예제와 같으니 비교해서 봐보자.
+
+```java
+# 인터페이스: 개별 결제 방식 정의
+public interface PaymentStrategy {
+    void executePayment();
+}
+```
+
+```java
+# 결제 전략 1: 카카오
+public class KakaoPaymentStrategy implements PaymentStrategy {
+  @Override
+  public void executePayment() {
+    System.out.println("카카오 카드 결제 실행");
+  }
+}
+
+# 결제 전략 2: 삼성
+public class SamsungPaymentStrategy implements PaymentStrategy {
+  @Override
+  public void executePayment() {
+    System.out.println("삼성 카드 결제 실행");
+  }
+}
+```
+
+```java
+# 공통 결제 흐름: 결제 전략을 받아서 결제 실행
+public class CardPaymentService {
+
+    private final PaymentStrategy strategy;
+
+    public CardPaymentService(PaymentStrategy strategy) {
+        this.strategy = strategy;
+    }
+
+    public void processPayment() {
+        checkPaymentInfo();        // 공통
+        strategy.executePayment(); // 전략에 위임
+        logPaymentResult();        // 공통
+    }
+
+    private void checkPaymentInfo() {
+        System.out.println("결제 정보 확인 중...");
+    }
+
+    private void logPaymentResult() {
+        System.out.println("결제 결과 로그 남기기");
+    }
+```
+
+```java
+# 실행 예시
+public class Main {
+    public static void main(String[] args) {
+        PaymentStrategy kakaoStrategy = new KakaoPaymentStrategy();
+        CardPaymentService kakaoService = new CardPaymentService(kakaoStrategy);
+        kakaoService.processPayment();
+
+        System.out.println();
+
+        PaymentStrategy samsungStrategy = new SamsungPaymentStrategy();
+        CardPaymentService samsungService = new CardPaymentService(samsungStrategy);
+        samsungService.processPayment();
+    }
+}
+```
+
+### 왜 조합이 더 유연할까
+- 한 번 선언한 클래스를 다양한 전략과 조합할 수 있어 재사용성이 높아짐
+- 런타임 시 동적으로 전략 교체도 가능
+- 상속은 컴파일 타임에 결정되는 반면, 조합은 실행 시 유연하게 대응 가능
+예시:
+
+```java
+// 전략 바꾸기
+paymentService.setStrategy(new AnotherStrategy());
+```
+
+유연성 (Flexibility)
+- 객체를 동적으로 조합하거나 교체할 수 있어서 확장성이 뛰어남
+- 실행 중에도 전략 변경 가능 → 런타임 유연성
+
+낮은 결합도 (Low Coupling)
+- 구현보다는 인터페이스에 의존
+- 내부 구현 변경 시 다른 클래스에 미치는 영향이 적음 → 유지보수 쉬움
+
+재사용성 향상
+- 다양한 클래스에서 동일한 기능(구성 요소)을 중복 없이 공유 가능
+- has-a 관계이므로 구조가 더 자유롭고, 유연하게 조립 가능
+
+단일 책임 원칙(SRP) 준수에 용이
+- 기능 단위를 객체로 분리할 수 있어서 각 클래스가 한 가지 일만 하도록 설계 가능
+- 유지보수, 테스트, 확장이 더 쉬워짐
+
+테스트 용이성
+- 외부 객체(mock)를 주입하여 단위 테스트 작성이 쉬움
+- 상속 구조보다 테스트 격리가 쉬움
+- 
+> "상속은 설계 당시엔 편할 수 있지만, 조합은 변화에 강한 구조를 만든다."
