@@ -328,16 +328,6 @@ WeakReference<MyObject> weakRef = new WeakReference<>(new MyObject());
   - 그런데 `WeakReference`를 쓰면, 이 `MyObject`가 더 이상 사용되지 않으면 GC가 정리해줌
   - 즉, 캐시는 계속 쌓이지 않고 필요 없어진 객체는 자동으로 정리됨
 
-- 실제 사례 : `String.intern()`
-
-  ```java
-  String a = "hello".intern();
-  String b = "hello".intern();
-  System.out.println(a == b); // true
-  ```
-  
-  - `String.intern()`도 개념이 비슷하다.
-  - 만약 JVM의 문자열 풀을 확인하여 해당 문자열이 이미 존재하면 그 풀 안에 있는 문자열 객체의 참조를 반환하고, 없다면 객체를 문자열 풀에 새로 추가하고, 풀에 추가된 그 객체의 참조를 반환한다.
 
 #### **참조 큐(reference queue)** 에 등록된 약한 참조들 중에서 새롭게 해제된 것들을 해당 큐에 넣을(enqueue) 것입니다 ❓
 > GC가 어떤 객체를 메모리에서 지우면, 그 객체를 가리키던 약한 참조(WeakReference)를 참조 큐(ReferenceQueue)에 자동으로 넣는다.
@@ -362,6 +352,55 @@ WeakReference<MyObject> weakRef = new WeakReference<>(new MyObject());
   if(reference != null){
       System.out.println("GC가 객체를 제거했다!");
   }
+  
+  /**
+  *  실행 결과 :
+  *  GC가 객체를 제거했다!
+  */
   ```
+  
+---
 
+## 4. Phantom Reference
+### 간단 설명
+팬텀 참조는 객체가 GC에 의해 수거된 이후, 즉, **객체가 메모리에서 사라지기 직전에 "그 객체가 이제 사라질거야"라는 신호를 받을 수 있는 참조 방식이다.**
+```
+PhantomReference<Object> phantomRef = new PhantomReference<>(new Object(), referenceQueue);
+```
+이렇게 만들고 나면, 해당 객체는 언제든 GC의 대상이 될 수 있고 GC가 객체를 수거한 직후, `ReferenceQueue`에 팬텀 참조가 들어가게 된다.
 
+### 언제 사용할까 ?
+**팬텀 참조는 객체가 메모리에서 완전히 사라지기 직전에 리소스를 정리하거나 어떤 처리를 하고 싶을 때 사용한다.**
+
+#### 대표적인 예시
+- 객체와 관련된 native 리소스 (ex. 파일 핸들, 소켓, DB 연결 등)를 수동으로 해제해야 할 때
+- JVM레벨에서 더 정교한 메모리 정리 관리 도구 만들 때
+>`finalize()`는 성능과 보안 문제로 `deprecated` 되었기 때문에, 대안으로 `PhantomReference + ReferenceQueue` 조합을 사용 ❗
+
+### 예제 코드
+```java
+public class PhantomRefExample {
+    public static void main(String[] args) throws Exception {
+        ReferenceQueue<Object> refQueue = new ReferenceQueue<>();
+
+        Object obj = new Object();
+        PhantomReference<Object> phantomRef = new PhantomReference<>(obj, refQueue);
+
+        System.out.println("Before GC: " + phantomRef.get()); // 항상 null
+
+        obj = null; // 강한 참조 제거
+        System.gc();
+
+        Thread.sleep(1000); // GC가 실행될 시간 줌
+
+        Reference<?> refFromQueue = refQueue.poll();
+        if (refFromQueue != null) {
+            System.out.println("객체가 GC 대상이 되어 팬텀 참조 큐에 들어옴!");
+        }
+    }
+}
+```
+- `phantomRef.get()`은 항상 `null`이다. (팬텀 참조는 실제 객체에 접근 불가)
+- GC가 객체를 수거하면 `refQueue`에 팬텀 참조가 들어감
+- `poll()`로 꺼내면서 "아, 이제 진짜 없어졌구나" 를 감지할 수 있음
+> 팬텀 참조는 "객체가 사라졌음을 감지" 하기 위한 도구지, 객체를 사용하는 용도가 아니다 ❗
