@@ -1,0 +1,55 @@
+<div class="bookmark-card" data-url="{{ include.url }}">
+  <a href="{{ include.url }}" target="_blank" rel="noopener noreferrer" class="bookmark-link">
+    <div class="bookmark-content">
+      <div class="bookmark-text">
+        <div class="bookmark-title">불러오는 중...</div>
+        <div class="bookmark-description"></div>
+        <div class="bookmark-meta">
+          <img class="bookmark-favicon" src="" alt="" style="display:none">
+          <span class="bookmark-url">{{ include.url }}</span>
+        </div>
+      </div>
+      <div class="bookmark-thumbnail" style="display:none">
+        <img src="" alt="thumbnail">
+      </div>
+    </div>
+  </a>
+</div>
+
+<script>
+if (!window.__bookmarkInitialized) {
+  window.__bookmarkInitialized = true;
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.bookmark-card[data-url]').forEach(function (card) {
+      var url = card.dataset.url;
+      fetch('https://api.microlink.io/?url=' + encodeURIComponent(url))
+        .then(function (res) { return res.json(); })
+        .then(function (data) {
+          if (data.status !== 'success') return;
+          var d = data.data;
+          var title = card.querySelector('.bookmark-title');
+          var desc = card.querySelector('.bookmark-description');
+          var favicon = card.querySelector('.bookmark-favicon');
+          var thumb = card.querySelector('.bookmark-thumbnail');
+          var thumbImg = thumb.querySelector('img');
+          var urlSpan = card.querySelector('.bookmark-url');
+
+          if (d.title) title.textContent = d.title;
+          if (d.description) desc.textContent = d.description;
+          if (d.url) urlSpan.textContent = new URL(d.url).hostname;
+          if (d.logo && d.logo.url) {
+            favicon.src = d.logo.url;
+            favicon.style.display = 'inline-block';
+          }
+          if (d.image && d.image.url) {
+            thumbImg.src = d.image.url;
+            thumb.style.display = 'block';
+          }
+        })
+        .catch(function () {
+          card.querySelector('.bookmark-title').textContent = url;
+        });
+    });
+  });
+}
+</script>

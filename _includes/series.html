@@ -1,0 +1,28 @@
+{% if page.series %}
+  {% assign series_posts = site.posts | where: "series", page.series | sort: "path" %}
+  {% if series_posts.size > 1 %}
+  <div class="series-box">
+    <div class="series-header">
+      <i class="fas fa-layer-group me-2"></i>
+      <span class="series-label">시리즈</span>
+      <span class="series-title">{{ page.series }}</span>
+      <span class="series-count">{{ series_posts.size }}편</span>
+    </div>
+    <ol class="series-list">
+      {% for s_post in series_posts %}
+        <li class="series-item {% if s_post.url == page.url %}active{% endif %}">
+          {% if s_post.url == page.url %}
+            <span class="series-current">
+              <i class="fas fa-circle-dot me-1"></i>{{ s_post.title }}
+            </span>
+          {% else %}
+            <a href="{{ s_post.url | relative_url }}" class="series-link">
+              {{ s_post.title }}
+            </a>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ol>
+  </div>
+  {% endif %}
+{% endif %}
