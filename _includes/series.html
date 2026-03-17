@@ -16,7 +16,7 @@
               <i class="fas fa-circle-dot me-1"></i>{{ s_post.title }}
             </span>
           {% else %}
-            <a href="{{ s_post.url | relative_url }}" class="series-link">
+            <a href="{{ s_post.url | relative_url | replace: '&', '&amp;' }}" class="series-link">
               {{ s_post.title }}
             </a>
           {% endif %}
