@@ -5,12 +5,12 @@
         <div class="bookmark-title">불러오는 중...</div>
         <div class="bookmark-description"></div>
         <div class="bookmark-meta">
-          <img class="bookmark-favicon" src="" alt="" style="display:none">
+          <img class="bookmark-favicon" data-src="" alt="" style="display:none" data-proofer-ignore>
           <span class="bookmark-url">{{ include.url }}</span>
         </div>
       </div>
       <div class="bookmark-thumbnail" style="display:none">
-        <img src="" alt="thumbnail">
+        <img data-src="" alt="thumbnail" data-proofer-ignore>
       </div>
     </div>
   </a>
@@ -31,7 +31,7 @@ if (!window.__bookmarkInitialized) {
           var desc = card.querySelector('.bookmark-description');
           var favicon = card.querySelector('.bookmark-favicon');
           var thumb = card.querySelector('.bookmark-thumbnail');
-          var thumbImg = thumb.querySelector('img');
+          var thumbImg = thumb.querySelector('img[data-src]');
           var urlSpan = card.querySelector('.bookmark-url');
 
           if (d.title) title.textContent = d.title;
@@ -39,10 +39,12 @@ if (!window.__bookmarkInitialized) {
           if (d.url) urlSpan.textContent = new URL(d.url).hostname;
           if (d.logo && d.logo.url) {
             favicon.src = d.logo.url;
+            favicon.removeAttribute('data-src');
             favicon.style.display = 'inline-block';
           }
           if (d.image && d.image.url) {
             thumbImg.src = d.image.url;
+            thumbImg.removeAttribute('data-src');
             thumb.style.display = 'block';
           }
         })
