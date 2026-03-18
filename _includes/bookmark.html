@@ -1,25 +1,36 @@
 <div class="bookmark-card" data-url="{{ include.url }}" data-proofer-ignore>
-  <a href="{{ include.url }}" target="_blank" rel="noopener noreferrer" class="bookmark-link" data-proofer-ignore>
+  <a href="{{ include.url }}" target="_blank" rel="noopener noreferrer" class="bookmark-link">
+
+    <!-- 브라우저 상단 바 -->
+    <div class="bookmark-bar">
+      <span class="bookmark-dots">
+        <i></i><i></i><i></i>
+      </span>
+      <div class="bookmark-address">
+        <span class="bookmark-favicon-holder"></span>
+        <span class="bookmark-domain">{{ include.url | split: '//' | last | split: '/' | first }}</span>
+      </div>
+      <svg class="bookmark-ext" width="12" height="12" viewBox="0 0 12 12" fill="none">
+        <path d="M2 10L10 2M10 2H5.5M10 2V6.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+
+    <!-- 콘텐츠 영역 -->
     <div class="bookmark-content">
       <div class="bookmark-text">
         <div class="bookmark-title">불러오는 중...</div>
         <div class="bookmark-description"></div>
-        <div class="bookmark-meta">
-          <img class="bookmark-favicon" data-src="" alt="" style="display:none" data-proofer-ignore>
-          <span class="bookmark-url">{{ include.url }}</span>
-        </div>
       </div>
-      <div class="bookmark-thumbnail" style="display:none">
-        <img data-src="" alt="thumbnail" data-proofer-ignore>
-      </div>
+      <div class="bookmark-thumbnail"></div>
     </div>
+
   </a>
 </div>
 
 <script>
 if (!window.__bookmarkInitialized) {
   window.__bookmarkInitialized = true;
-  document.addEventListener('DOMContentLoaded', function () {
+  function _initBookmarks() {
     document.querySelectorAll('.bookmark-card[data-url]').forEach(function (card) {
       var url = card.dataset.url;
       fetch('https://api.microlink.io/?url=' + encodeURIComponent(url))
@@ -27,31 +38,40 @@ if (!window.__bookmarkInitialized) {
         .then(function (data) {
           if (data.status !== 'success') return;
           var d = data.data;
-          var title = card.querySelector('.bookmark-title');
-          var desc = card.querySelector('.bookmark-description');
-          var favicon = card.querySelector('.bookmark-favicon');
-          var thumb = card.querySelector('.bookmark-thumbnail');
-          var thumbImg = thumb.querySelector('img[data-src]');
-          var urlSpan = card.querySelector('.bookmark-url');
+          var title        = card.querySelector('.bookmark-title');
+          var desc         = card.querySelector('.bookmark-description');
+          var faviconHolder = card.querySelector('.bookmark-favicon-holder');
+          var domain       = card.querySelector('.bookmark-domain');
+          var thumb        = card.querySelector('.bookmark-thumbnail');
 
-          if (d.title) title.textContent = d.title;
-          if (d.description) desc.textContent = d.description;
-          if (d.url) urlSpan.textContent = new URL(d.url).hostname;
+          if (d.title)       title.textContent  = d.title;
+          if (d.description) desc.textContent   = d.description;
+          if (d.url)         domain.textContent = new URL(d.url).hostname;
+
           if (d.logo && d.logo.url) {
+            var favicon = document.createElement('img');
             favicon.src = d.logo.url;
-            favicon.removeAttribute('data-src');
-            favicon.style.display = 'inline-block';
+            favicon.alt = '';
+            favicon.className = 'bookmark-favicon';
+            faviconHolder.appendChild(favicon);
           }
           if (d.image && d.image.url) {
+            var thumbImg = document.createElement('img');
             thumbImg.src = d.image.url;
-            thumbImg.removeAttribute('data-src');
-            thumb.style.display = 'block';
+            thumbImg.alt = '';
+            thumb.appendChild(thumbImg);
+            thumb.style.display = 'flex';
           }
         })
         .catch(function () {
           card.querySelector('.bookmark-title').textContent = url;
         });
     });
-  });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', _initBookmarks);
+  } else {
+    _initBookmarks();
+  }
 }
 </script>

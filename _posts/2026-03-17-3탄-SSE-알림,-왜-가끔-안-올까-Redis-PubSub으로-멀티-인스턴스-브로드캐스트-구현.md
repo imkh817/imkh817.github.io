@@ -9,11 +9,10 @@ image:
 
 ## 개요
 
-{% include bookmark.html url="https://imkh817.github.io/posts/2탄-Consumer가-죽으면-메시지는-어디-있을까/" %}
-
 2탄에서는 Consumer가 처리에 실패했을 때 메시지를 유실하지 않고 재처리하는 방법을 정리했다.
 Redis Streams로 알림 DB 저장까지는 해결했지만, SSE 전송은 여전히 Spring Event에 의존하고 있어 멀티 인스턴스 환경에서 알림이 전달되지 않는 문제가 남아 있다.
 1탄과 비슷한 문제지만, 이번엔 `Redis Streams` 대신 `Redis Pub/Sub`을 선택했다.
+{% include bookmark.html url="https://imkh817.github.io/posts/2탄-Consumer가-죽으면-메시지는-어디-있을까/" %}
 
 ## 문제 상황
 현재 구조에서 SSE 전송은 아래와 같이 동작한다.
