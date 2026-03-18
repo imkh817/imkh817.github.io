@@ -11,7 +11,7 @@ layout: page
 {% else %}
   <div class="series-page">
     {% for series_name in all_series %}
-      {% assign series_posts = site.posts | where: "series", series_name | sort: "path" %}
+      {% assign series_posts = site.posts | where: "series", series_name | sort: "date" %}
       <div class="series-page-card">
         <div class="series-page-header">
           <div class="series-page-title-wrap">

@@ -2,7 +2,7 @@
 title: "[3탄] SSE 알림, 왜 가끔 안 올까 — Redis Pub/Sub으로 멀티 인스턴스 브로드캐스트 구현"
 series: "[블로그 프로젝트] 알림 구조 개선"
 date: 2026-03-17 20:09:21 +0900
-categories: [Redis 활용]
+categories: [blog-project, 알림 구조 개선]
 image:
   path: /assets/img/thumbnails/공부해야지.png
 ---
@@ -156,7 +156,7 @@ public void handle(NotificationSseEvent event) {
 ```
 
 ### 전체 흐름
-```plan text
+```
 Redis Consumer (알림 DB 저장 완료)
       │
       ▼  트랜잭션 커밋

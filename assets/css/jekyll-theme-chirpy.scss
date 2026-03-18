@@ -273,6 +273,8 @@ body {
   &:nth-child(2) { background: #f0fdf4; color: #16a34a; border: 1.5px solid #bbf7d0; }
   &:nth-child(3) { background: #fef2f2; color: #dc2626; border: 1.5px solid #fecaca; }
   &:nth-child(4) { background: #fffbeb; color: #d97706; border: 1.5px solid #fde68a; }
+  &:nth-child(5) { background: #fdf4ff; color: #9333ea; border: 1.5px solid #e9d5ff; }
+  &:nth-child(6) { background: #ecfeff; color: #0891b2; border: 1.5px solid #a5f3fc; text-align: center; min-width: 4.5rem; }
 
   &:hover {
     transform: translateY(-3px) scale(1.06);

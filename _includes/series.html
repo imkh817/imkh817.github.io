@@ -1,5 +1,5 @@
 {% if page.series %}
-  {% assign series_posts = site.posts | where: "series", page.series | sort: "path" %}
+  {% assign series_posts = site.posts | where: "series", page.series | sort: "date" %}
   {% if series_posts.size > 1 %}
   <div class="series-box">
     <div class="series-header">
